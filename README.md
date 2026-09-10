@@ -133,12 +133,16 @@ in the manifest simply does not play, so the game runs with no audio at all.
 
 ## Screen fit
 
-`fitView(width, height)` returns one scale for both axes: nothing is letterboxed, nothing is
-stretched, and a screen's leftover shape becomes more world rather than black bars. Between about
-600 and 2000 px across it draws at exactly the size the game is written in; past those a small
-screen sees less world rather than a fort of specks, and a huge one sees the same arena drawn
-bigger. `reframe(width, height)` in the scene is called on every resize and lays everything out
-from that alone — which is why a phone rotating mid-game is not a special case.
+`fitView(width, height)` is a *contain* fit of the world the game is written for (`WORLD`), and it
+returns one scale for both axes: nothing is letterboxed, nothing is stretched, and a screen's
+leftover shape becomes more world rather than black bars. A window shrunk either way draws
+everything smaller rather than cutting the sides off the arena, and a bigger one draws the same
+world bigger — the rule a 2D game writes as `min(width / designWidth, height / designHeight)`. Two
+bounds stop it: `LEAST_SCALE`, below which a window far off the shape the game is written in crops
+instead of shrinking further, and `MOST_WIDTH`, where a very wide one is drawn bigger rather than
+given a fort adrift in an empty field. `reframe(width, height)` in the scene is called on every
+resize and lays everything out from that alone — which is why a phone rotating mid-game is not a
+special case.
 
 ## Tests
 

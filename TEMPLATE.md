@@ -72,8 +72,8 @@ finds all of them; this is the list:
 | The lines the game says | `src/i18n.ts` (`TRANSLATIONS`) |
 | Languages spoken | `src/i18n.ts` (`LANGUAGES`) — and add a column to every line |
 | Music states, music and cue files | `src/audio/manifest.ts` |
-| How much world a screen shows | `src/core/View.ts` (`LEAST`, `MOST`) — then fix `test/view.test.ts` |
-| …in 3D, and where the camera sits | `src/core/View3d.ts` (`LEAST`, `MOST`, `FOV`, `DISTANCE`) — then fix `test/view3d.test.ts` |
+| How much world a screen shows | `src/core/View.ts` (`WORLD`, `LEAST_SCALE`, `MOST_WIDTH`) — then fix `test/view.test.ts` |
+| …in 3D, and where the camera sits | `src/core/View3d.ts` (`WORLD`, `LEAST_SCALE`, `MOST_WIDTH`, `FOV`) — then fix `test/view3d.test.ts` |
 | The HUD's look, in 3D | `#hud` in `index.html` |
 
 ### Gut

@@ -125,7 +125,7 @@ export class Scene extends Container {
     this.hitArea = new Rectangle(0, 0, width, height);
     this.world.scale.set(this.view.scale);
     this.world.position.set(width / 2, height - toPixels(1) * this.view.scale);
-    this.hud.scale.set(fitHud(width, height, this.view));
+    this.hud.scale.set(fitHud(width, height));
     this.score.position.set(16, 16);
     this.draw();
   }

@@ -1,32 +1,51 @@
 // The extension is what lets `node --test` load this module and the one it needs straight from
 // TypeScript, which is how the rule below is tested (see test/view.test.ts).
-import { PPM } from '../physics/Physics.ts';
+import { PPM, toMeters } from '../physics/Physics.ts';
 
 /**
- * The least of the world a screen ever shows, in metres: room enough either side of the core to
- * build a fort, and headroom enough over it that something coming down is seen coming. A screen
- * too small to show that much at the size the game is drawn at is drawn smaller until it does,
- * which is what a phone gets.
+ * The world the game is written for, in metres: room enough either side of the core to build a
+ * fort, and headroom enough over it that something coming down is seen coming. All of it is on
+ * screen on every window that has the shape for it, and a window of another shape keeps whichever
+ * side of it is tighter and gets the rest as spare world.
+ *
+ * This rectangle is the whole of how big things look. It is a *contain* fit — between the two
+ * bounds below, `scale` is exactly `min(width / designWidth, height / designHeight)` — so a window
+ * shrunk either way draws the world smaller rather than keeping the size and cutting the sides
+ * off. It is written as the
+ * screen it is drawn against rather than as two round numbers of metres, because that is the one
+ * shape where every sprite lands on the pixels it was drawn at: 1920 by 1080 at `PPM` is
+ * 38.4 by 21.6 metres, and there `scale` is 1. The 3D twin (src/core/View3d.ts) is written for
+ * the same rectangle in its own units, and frames a screen the same way. Two differences to know
+ * before comparing them: its `scale` is a world scale and this one is a pixel scale, so a 4K
+ * monitor doubles this one and leaves that one alone (both still draw a metre over the same number
+ * of screen pixels); and a perspective camera cannot tell a large tall window from a phone, since
+ * it sees only shape, so it crops one as it would the other while this half, which can tell, keeps
+ * showing all of `WORLD` wherever the pixels are there for it.
  */
-const LEAST = { width: 11, height: 8 };
+const WORLD = { width: toMeters(1920), height: toMeters(1080) };
 /**
- * And the most it ever shows. Past this the fort is a speck at the bottom of an empty sky and a
- * brick is a few pixels across, so a screen bigger than the game is drawn for is given the same
- * arena drawn bigger rather than more of the world. Between the two the game is drawn at exactly
- * the size it is written in, which is every ordinary window on every ordinary monitor.
+ * The floor under the rule above, and the only place it gives up: the world is never drawn below
+ * half the size it is written at. A window far off the shape the game is written in would
+ * otherwise go on shrinking it until a brick was a few pixels across, so past half size it stops
+ * and crops instead, and a phone held upright is played on the middle of the fort rather than on
+ * all of it as specks. This is the bound that matters most on a phone, where it is pixels that are
+ * short rather than shape.
  */
-const MOST = { width: 40, height: 26 };
+const LEAST_SCALE = 0.5;
+/**
+ * And the other end: how much world a very wide window is given across before it is drawn bigger
+ * instead. A quarter more than the game is written for, past which the fort is adrift in an empty
+ * field.
+ */
+const MOST_WIDTH = WORLD.width * 1.25;
 
 /**
- * The HUD is drawn at its own size on a screen this wide and this tall, and shrunk with a smaller
- * one, so that its row of buttons never takes the whole of a small screen — the width is what its
- * buttons wrap against, and the height what a row of them is measured against, which is what a
- * long, shallow window is short of. It is never drawn below this much of itself, where a finger
- * would have nothing left to hit, nor above this much, which is where a very large screen stops
- * making it bigger.
+ * The HUD is drawn at its own size on a screen this wide and this tall — the one it is designed
+ * against — and scaled with the screen either way from there. It is never drawn below this much of
+ * itself, where a finger would have nothing left to hit, nor above this much, where a very large
+ * screen stops making it bigger.
  */
-const HUD_WIDTH = 1000;
-const HUD_HEIGHT = 500;
+const HUD_SCREEN = { width: 1920, height: 1080 };
 const HUD_LEAST = 0.8;
 const HUD_MOST = 2;
 
@@ -48,36 +67,41 @@ export interface View {
 /**
  * How much of the world a screen of this size shows, and how big to draw it.
  *
- * Fewer metres on the screen means a bigger scale, so the most the world may be shown of is the
- * least it may be drawn at, and the least it may be shown of the most: the two bounds meet in a
- * range of scales, and the game is drawn at the size it is written in wherever that range allows
- * it, which is every window between about six hundred and two thousand pixels across. Outside the
- * range the nearer bound wins, so a small screen sees less of the world rather than a fort of
- * specks, and a huge one sees the same arena drawn twice the size rather than twice the arena.
+ * The world is drawn smaller until all of `WORLD` is on screen, so a window made narrower or
+ * shorter draws everything smaller instead of losing the sides of the fort, and a window made
+ * bigger draws the same world bigger. The scale is one number for both axes and whatever room the
+ * screen's shape leaves over is spare world — sky above a tall window, floor beside a wide one —
+ * so nothing is letterboxed and nothing is stretched.
  *
- * Nothing is letterboxed and nothing is stretched: the scale is one number for both axes, and
- * whatever room the screen's shape leaves over is more world — sky above a tall screen, floor
- * beside a wide one. A screen so long one way that it cannot have both bounds at once keeps the
- * cap on how much it shows and gives up the floor under it, which is the milder of the two: a
- * little less room to build beats a fort too small to see.
+ * The two bounds on it are `LEAST_SCALE`, which stops the world shrinking for ever on a window far
+ * off the shape the game is written in — past it the fort is cropped rather than shrunk, because a
+ * little less room to build beats a fort too small to see — and `MOST_WIDTH`, which draws it
+ * bigger again on a very wide one.
  */
 export function fitView(screenWidth: number, screenHeight: number): View {
   const width = Math.max(1, screenWidth);
   const height = Math.max(1, screenHeight);
-  const least = Math.max(width / MOST.width, height / MOST.height);
-  const most = Math.min(width / LEAST.width, height / LEAST.height);
-  const ppm = Math.max(least, Math.min(PPM, most));
+  // In pixels per metre: what it takes to hold all of `WORLD`, what half size is, and what it
+  // takes to keep a wide window down to `MOST_WIDTH` of world across.
+  const contain = Math.min(width / WORLD.width, height / WORLD.height);
+  const ppm = Math.max(contain, PPM * LEAST_SCALE, width / MOST_WIDTH);
   return { ppm, scale: ppm / PPM, width: width / ppm, height: height / ppm };
 }
 
 /**
- * What the HUD is drawn at on a screen of this size showing this view: its own size on any
- * ordinary window, smaller on a small one so that its buttons wrap into a row or two rather than a
- * wall of them, and bigger on a screen the world itself is drawn big on, so that the two keep
- * step — but never bigger than the screen has the height to spare for, since a window twice as
- * wide as the world is drawn for is still only as tall as it is.
+ * What the HUD is drawn at on a screen of this size: its own size on the screen it is designed
+ * against, smaller on a small one so that its buttons wrap into a row or two rather than a wall of
+ * them, and bigger on a screen with the room to spare.
+ *
+ * It reads the screen and not the view, and that is deliberate: `view.scale` moves with the
+ * window's *shape* now, and a HUD that grew as a window was narrowed would be a row of buttons
+ * crowding a world that had just been drawn smaller to make room for them. Identical to the 3D
+ * twin's, which is the point — a HUD is a HUD whatever is drawing behind it.
  */
-export function fitHud(screenWidth: number, screenHeight: number, view: View): number {
-  const room = Math.min(Math.max(1, screenWidth) / HUD_WIDTH, Math.max(1, screenHeight) / HUD_HEIGHT);
-  return Math.max(HUD_LEAST, Math.min(HUD_MOST, view.scale, room));
+export function fitHud(screenWidth: number, screenHeight: number): number {
+  const room = Math.min(
+    Math.max(1, screenWidth) / HUD_SCREEN.width,
+    Math.max(1, screenHeight) / HUD_SCREEN.height,
+  );
+  return Math.max(HUD_LEAST, Math.min(HUD_MOST, room));
 }

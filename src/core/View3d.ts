@@ -9,9 +9,10 @@
  *
  * One thing is genuinely different and worth knowing before you tune the numbers: a perspective
  * camera does not care how many pixels a screen has, only what shape it is. A 4K monitor and a
- * 720p one of the same shape show exactly the same world; a phone shows less because it is narrow,
- * not because it is small. So these bounds are read against the *aspect ratio*, and the pixel
- * count only ever reaches the HUD (see `fitHud`).
+ * 720p one of the same shape show exactly the same world, each metre of it drawn over twice the
+ * pixels; a window shrunk *unevenly* is what pulls the camera, and it pulls it by the tighter of
+ * the two sides. So the rule below is read against the *aspect ratio*, and the pixel count only
+ * ever reaches the HUD (see `fitHud`).
  *
  * This module deliberately imports nothing from three.js. It is arithmetic, and arithmetic is
  * testable without a browser (see test/view3d.test.ts); `Scene3d` is what puts the answer on a
@@ -25,26 +26,43 @@
  */
 export const FOV = 45;
 
-/**
- * TEMPLATE: how far the camera sits from the plane the game is played on when nothing is forcing
- * it elsewhere — the size the game is written at, and the 3D counterpart of the 2D half's `PPM`.
- * Move this and everything gets bigger or smaller together.
- */
-export const DISTANCE = 22;
+/** Half the visible height at a distance, the whole of the perspective arithmetic in one line. */
+const spread = (fovDegrees: number): number => Math.tan((fovDegrees * Math.PI) / 360);
 
 /**
- * TEMPLATE: the least of the world a screen ever shows, in metres, measured on the arena plane:
- * room enough either side of the middle to build, and headroom enough over it that something
- * coming down is seen coming. A screen too narrow to show that much pulls the camera back until
- * it does, which is what a phone gets.
+ * TEMPLATE: the world the game is written for, in metres, measured on the arena plane: room
+ * enough either side of the middle to build, and headroom enough over it that something coming
+ * down is seen coming. All of it is on screen on every window that has the shape for it, and a
+ * window of another shape keeps whichever side of it is tighter and gets the rest as spare world.
+ *
+ * This rectangle is the whole of how big things look. It is a *contain* fit, the same rule a 2D
+ * game writes as `scale = min(width / designWidth, height / designHeight)`: a window shrunk either
+ * way pulls the camera back and draws the world smaller, rather than keeping the size and cutting
+ * the sides off. Make the rectangle smaller and everything is drawn bigger, together.
  */
-const LEAST = { width: 11, height: 8 };
+const WORLD = { width: 32, height: 18 };
 /**
- * And the most it ever shows. Past this the arena is a speck in an empty field, so a screen wider
- * than the game is drawn for is brought closer and given the same arena bigger rather than more of
- * the world.
+ * The floor under the rule above, and the only place it gives up: the world is never drawn below
+ * half the size it is written at. A window far off the shape the game is written in would
+ * otherwise go on pulling the camera back until a box was a few pixels across, so past half size
+ * it stops and crops instead, and a phone held upright is played on the middle of the arena rather
+ * than on all of it as specks.
  */
-const MOST = { width: 40, height: 26 };
+const LEAST_SCALE = 0.5;
+/**
+ * And the other end: how much world a very wide window is given across before it is brought back
+ * in and drawn bigger instead. A quarter more than the game is written for, past which the arena
+ * is adrift in an empty field.
+ */
+const MOST_WIDTH = WORLD.width * 1.25;
+
+/**
+ * TEMPLATE: how far the camera sits from the arena plane when the screen has exactly the shape
+ * `WORLD` is written in — the size the game is written at, and the 3D counterpart of the 2D half's
+ * `PPM`. Everything reads its own size against this, so it is derived from the rectangle rather
+ * than typed in beside it: the two disagreeing is a game whose `scale` is never quite 1.
+ */
+export const DISTANCE = WORLD.height / (2 * spread(FOV));
 
 /**
  * The HUD is a DOM overlay (three.js has no text, and a browser is very good at it). It is drawn at
@@ -74,29 +92,26 @@ export interface View {
   readonly height: number;
 }
 
-/** Half the visible height at a distance, the whole of the perspective arithmetic in one line. */
-const spread = (fovDegrees: number): number => Math.tan((fovDegrees * Math.PI) / 360);
-
 /**
  * Where to put the camera for a screen of this shape.
  *
- * The two bounds meet in a range of distances, and the camera sits at `DISTANCE` — the size the
- * game is written at — wherever that range allows it, which is every ordinary window. Outside the
- * range the nearer bound wins, so a narrow screen is pulled back until it can see the arena rather
- * than a slice of it, and a very wide one is brought in so the arena still fills the screen.
+ * The camera is pulled back until all of `WORLD` is on screen, so a window made narrower or
+ * shorter draws everything smaller instead of losing the sides of the arena, and a window made
+ * bigger draws the same world bigger. Whatever room the screen's shape leaves over is spare
+ * world — sky above a tall window, floor beside a wide one — so nothing is letterboxed and
+ * nothing is stretched.
  *
- * A screen so long one way that it cannot have both bounds at once keeps the cap on how much it
- * shows and gives up the floor under it, which is the milder of the two: a little less room to
- * build beats an arena too small to see.
+ * The two bounds on it are `LEAST_SCALE`, which stops the camera backing off for ever on a window
+ * far off the shape the game is written in — past it the arena is cropped rather than shrunk,
+ * because a little less room to build beats an arena too small to see — and `MOST_WIDTH`, which
+ * brings it in again on a very wide one.
  */
 export function fitView(screenWidth: number, screenHeight: number): View {
   const aspect = Math.max(1, screenWidth) / Math.max(1, screenHeight);
-  const natural = 2 * DISTANCE * spread(FOV);
-  // In metres of visible height: the least the bounds allow, the most they allow, and where the
-  // camera would rather be. Written this way round because height is what a field of view is in.
-  const least = Math.max(LEAST.height, LEAST.width / aspect);
-  const most = Math.min(MOST.height, MOST.width / aspect);
-  const height = Math.min(most, Math.max(natural, least));
+  // All in metres of visible height, because that is what a field of view is in: what it takes to
+  // hold `WORLD` at this shape, how far back half size is, and how far back `MOST_WIDTH` is.
+  const contain = Math.max(WORLD.height, WORLD.width / aspect);
+  const height = Math.min(contain, WORLD.height / LEAST_SCALE, MOST_WIDTH / aspect);
   const distance = height / (2 * spread(FOV));
   return { fov: FOV, distance, scale: DISTANCE / distance, width: height * aspect, height };
 }
@@ -109,9 +124,11 @@ export function fitView(screenWidth: number, screenHeight: number): View {
  * Unlike the 2D half's, this does not take a `View`, and the difference is worth understanding
  * before either is changed. In 2D the scale is capped, so a huge monitor draws the world only a
  * little bigger and the HUD follows `view.scale` to keep step with it. Here the camera frames by
- * shape alone: the same arena is spread over whatever pixels the screen has, so a screen twice the
- * height draws every metre twice the size all by itself. The screen is therefore the whole of the
- * measure, and a `scale` term would only add a wobble as the aspect ratio changed.
+ * shape alone: the same world is spread over whatever pixels the screen has, so a screen twice the
+ * height draws every metre twice the size all by itself, and the screen is the whole of the
+ * measure. `view.scale` is deliberately left out of it: it moves with the window's *shape*, and a
+ * HUD that grew as a window was narrowed would be a row of buttons crowding a world that had just
+ * been drawn smaller to make room for them.
  */
 export function fitHud(screenWidth: number, screenHeight: number): number {
   const room = Math.min(
