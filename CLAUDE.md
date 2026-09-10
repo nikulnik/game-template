@@ -158,7 +158,7 @@ it with the `## Feeding the template` block in TEMPLATE.md § 1 → Keep the lin
 
 ```
 ~/projects/game         the fort/siege game this template was largely cut from
-~/projects/creepstorm   started from this template
+~/projects/creepstorm   started from this template — the three.js half, and the only game on it
 ~/projects/lidlness     Go backend + Pixi frontend; the audio manager came out of fe/src/audio_manager.js
 ```
 

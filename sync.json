@@ -280,7 +280,7 @@
     },
     "creepstorm": {
       "path": "../creepstorm",
-      "gave": "scaffolded 2026-09-10; nothing yet"
+      "gave": "scaffolded 2026-09-10; the first game on the three.js half, so it is the one that proves that side of the template still builds"
     }
   }
 }
