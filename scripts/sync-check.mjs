@@ -10,6 +10,9 @@
 //   drift   shared in spirit, expected to differ (a game renames things, adds scripts).
 //   manual  the same idea in different shapes — compare behaviour by hand.
 //
+// An entry marked `optional` is one half of a renderer pair (View.ts and View3d.ts, and so on).
+// A project keeps one half and deletes the other, so the missing one is not news.
+//
 // It also lists files the game has that the template does not, under the directories the template
 // considers shared. That list is the answer to "has anything reusable appeared since?".
 
@@ -39,6 +42,8 @@ for (const entry of shared) {
   const mine = read(join(ROOT, entry.template));
   const theirPath = entry.candidates.map((candidate) => join(target, candidate)).find(existsSync);
   if (!theirPath) {
+    // One half of a renderer pair, and this project kept the other. Nothing to report.
+    if (entry.optional) continue;
     counts.missing++;
     console.log(`  ?  ${entry.template}  — not in ${target}`);
     continue;

@@ -18,6 +18,43 @@ npm install && npm run dev
 the one `rm -rf .git`. Dependencies are never copied between projects — every project installs its
 own from `package-lock.json`.
 
+### Pick a renderer
+
+Do this first: it decides which half of the template you are keeping, and half the files below
+come in pairs.
+
+|  | 2D | 3D |
+| --- | --- | --- |
+| Draws with | Pixi.js v8 | three.js |
+| Physics | `@dimforge/rapier2d-compat`, y-**down** | `@dimforge/rapier3d-compat`, y-**up** |
+| Units | metres × `PPM` (50 px), one `scale` onto the screen | metres, and the camera does the rest |
+| HUD | drawn in the scene | `#hud`, a DOM overlay |
+| Startup | `src/main.ts` | `src/main3d.ts` |
+
+Look at both — `npm run dev` and `npm run dev:3d` are the same demo, boxes dropped on a floor.
+Then set `DEFAULT_RENDERER` in `vite.config.ts` and delete the other half:
+
+```bash
+# Keeping 2D — delete the three.js half
+rm src/main3d.ts src/game/Scene3d.ts src/core/View3d.ts src/physics/Physics3d.ts test/view3d.test.ts
+npm uninstall three @types/three @dimforge/rapier3d-compat
+# and the #hud div and its styles in index.html
+
+# Keeping 3D — delete the Pixi half
+rm src/main.ts src/game/Scene.ts src/core/View.ts src/physics/Physics.ts test/view.test.ts
+npm uninstall pixi.js @dimforge/rapier2d-compat
+```
+
+Nothing is renamed by either of those, so `main3d.ts` stays `main3d.ts` in a 3D project and the
+`RENDERER` switch goes on working. Leave the names alone even though they will look odd in a game
+that has no 2D half: `sync.json` matches by path, and a `View3d.ts` renamed to `View.ts` is
+indistinguishable from a 2D game's `View.ts` from the template's side, which is a `!!` on two files
+that were never meant to be the same.
+
+Do not keep both. One renderer is ~570 KB of vendor code, two WebGL contexts and two resize paths,
+and the only thing it really buys is Pixi's 2D UI over a three.js world — which the DOM overlay
+already does, better, for nothing.
+
 ### Rename
 
 Every placeholder is marked `TEMPLATE:` in the source. `grep -rn "TEMPLATE:" src *.ts *.html *.yml`
@@ -26,30 +63,33 @@ finds all of them; this is the list:
 | What | Where |
 | --- | --- |
 | `game-template`, description | `package.json` |
+| `DEFAULT_RENDERER` | `vite.config.ts` — see *Pick a renderer* above |
 | `<title>Game</title>` | `index.html` |
-| Page background `#1a1a2e` | `index.html`, `src/main.ts` (`BACKGROUND`), `electron/main.cjs` |
+| Page background `#1a1a2e` | `index.html`, `src/main.ts` / `src/main3d.ts` (`BACKGROUND`), `electron/main.cjs` |
 | `com.example.game`, `Game` | `capacitor.config.ts`, `electron-builder.yml` |
-| `keyPrefix: 'game'` (volume keys) | `src/main.ts` |
+| `keyPrefix: 'game'` (volume keys) | `src/main.ts` / `src/main3d.ts` |
 | Save keys and the save's shape | `src/game/Progress.ts` |
 | The lines the game says | `src/i18n.ts` (`TRANSLATIONS`) |
 | Languages spoken | `src/i18n.ts` (`LANGUAGES`) — and add a column to every line |
 | Music states, music and cue files | `src/audio/manifest.ts` |
 | How much world a screen shows | `src/core/View.ts` (`LEAST`, `MOST`) — then fix `test/view.test.ts` |
+| …in 3D, and where the camera sits | `src/core/View3d.ts` (`LEAST`, `MOST`, `FOV`, `DISTANCE`) — then fix `test/view3d.test.ts` |
+| The HUD's look, in 3D | `#hud` in `index.html` |
 
 ### Gut
 
-- `src/game/Scene.ts` — the demo. Delete it and write the game; keep `reframe` and the one-scale
-  rule (see CLAUDE.md).
+- `src/game/Scene.ts` or `Scene3d.ts` — the demo. Delete it and write the game; keep `reframe` and
+  the rule that nothing under it knows the screen size (see CLAUDE.md).
 - `src/game/Progress.ts` — keep the pattern, replace the shape.
-- `test/*.test.ts` — `view` and `i18n` stay useful as they are; `store` and `audio` test the
-  machinery and can stay untouched.
+- `test/*.test.ts` — `view` (or `view3d`) and `i18n` stay useful as they are; `store` and `audio`
+  test the machinery and can stay untouched.
 
 ### Drop what the game does not need
 
-- No physics? Delete `src/physics/`, drop `@dimforge/rapier2d-compat`, and remove the `physics`
-  group from `codeSplitting.groups` in `vite.config.ts`.
-- No audio? Delete `src/audio/`, drop `howler` and `@types/howler`, and the audio wiring in
-  `src/main.ts`.
+- No physics? Delete `src/physics/`, drop the `@dimforge/rapier*-compat` you kept, and remove the
+  `physics` group from `codeSplitting.groups` in `vite.config.ts`.
+- No audio? Delete `src/audio/`, drop `howler` and `@types/howler`, and the audio wiring in your
+  `main`.
 - Web only? Delete the adapters you will not ship, their `build:` scripts, `electron/`,
   `capacitor.config.ts`, `electron-builder.yml` — and trim `PLATFORMS` in `vite.config.ts`.
 
@@ -108,7 +148,8 @@ back here the same day, while the reason is still fresh. Small and often beats a
    template does not: candidates for adoption.
 2. Move the piece over, strip the game's own names out of it, and give it a test if it can have one.
 3. Add it to `sync.json` if it is a new shared file, and to the table in `README.md`.
-4. `npm run typecheck && npm test && npm run build:all`, then commit with the reason in the message.
+4. `npm run typecheck && npm test && npm run build:all`, and `RENDERER=three npm run build:all` if
+   the piece is in a file both halves use, then commit with the reason in the message.
 
 ### Something was fixed here
 
@@ -121,7 +162,8 @@ Port it only if all three answer yes. They are cheap to ask and they settle almo
 
 1. **Would the next game want this before it has any gameplay?** Startup order, a platform quirk,
    the resize rule, saves, audio, a build flag — yes. Anything that presumes bricks, waves, levels,
-   an economy or a weapon — no.
+   an economy or a weapon — no. A 3D game and a 2D one both count as *the next game*: if the piece
+   is true of only one renderer it still belongs here, in that half.
 2. **Can it be stated without naming this game?** If the code or the comment has to say *core*,
    *fort*, *creep* or *shot* to make sense, it is not template material; if it only needs to say
    *the world*, *the screen*, *a save*, it is.

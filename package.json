@@ -2,12 +2,13 @@
   "name": "game-template",
   "version": "0.1.0",
   "private": true,
-  "description": "Pixi.js + TypeScript + Vite game skeleton: five platform builds, saves, screen fit, i18n, physics, audio",
+  "description": "TypeScript + Vite game skeleton, 2D (Pixi.js) or 3D (three.js): five platform builds, saves, screen fit, i18n, physics, audio",
   "author": "Stanislav Nikulnikov",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
+    "dev:3d": "RENDERER=three vite",
     "dev:crazygames": "vite --mode crazygames",
     "dev:yandex": "vite --mode yandex",
     "build": "npm run build:web",
@@ -35,13 +36,16 @@
   "dependencies": {
     "@capacitor/core": "^8.5.1",
     "@dimforge/rapier2d-compat": "^0.19.3",
+    "@dimforge/rapier3d-compat": "^0.19.3",
     "howler": "^2.2.4",
-    "pixi.js": "^8.20.1"
+    "pixi.js": "^8.20.1",
+    "three": "^0.186.0"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.5.1",
     "@types/howler": "^2.2.12",
     "@types/node": "^26.4.1",
+    "@types/three": "^0.185.4",
     "electron": "^44.1.1",
     "electron-builder": "^26.15.3",
     "javascript-obfuscator": "^5.6.0",

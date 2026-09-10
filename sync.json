@@ -1,5 +1,5 @@
 {
-  "comment": "What this template shares with the games it came from, and where each piece lives in them. `npm run sync -- <project-dir>` diffs the exact ones and lists the rest. See TEMPLATE.md.",
+  "comment": "What this template shares with the games it came from, and where each piece lives in them. `npm run sync -- <project-dir>` diffs the exact ones and lists the rest. See TEMPLATE.md. `optional` marks one half of a renderer pair — a 2D game has View.ts and no View3d.ts, a 3D game the other way round — so a project is never nagged for the half it deliberately deleted.",
   "shared": [
     {
       "template": "src/platform/types.ts",
@@ -69,7 +69,17 @@
       "candidates": [
         "src/physics/Physics.ts"
       ],
-      "mode": "exact"
+      "mode": "exact",
+      "optional": true
+    },
+    {
+      "template": "src/physics/Physics3d.ts",
+      "candidates": [
+        "src/physics/Physics3d.ts"
+      ],
+      "mode": "exact",
+      "optional": true,
+      "note": "the three.js half of Physics.ts"
     },
     {
       "template": "build/obfuscate.ts",
@@ -91,14 +101,34 @@
         "src/core/View.ts",
         "src/game/View.ts"
       ],
-      "mode": "exact"
+      "mode": "exact",
+      "optional": true
+    },
+    {
+      "template": "src/core/View3d.ts",
+      "candidates": [
+        "src/core/View3d.ts"
+      ],
+      "mode": "exact",
+      "optional": true,
+      "note": "the three.js half of View.ts"
     },
     {
       "template": "test/view.test.ts",
       "candidates": [
         "test/view.test.ts"
       ],
-      "mode": "drift"
+      "mode": "drift",
+      "optional": true
+    },
+    {
+      "template": "test/view3d.test.ts",
+      "candidates": [
+        "test/view3d.test.ts"
+      ],
+      "mode": "drift",
+      "optional": true,
+      "note": "the three.js half of view.test.ts"
     },
     {
       "template": "vite.config.ts",
@@ -142,7 +172,7 @@
         "src/main.ts"
       ],
       "mode": "manual",
-      "note": "in an older game these live inside src/main.ts; in a scaffolded one the file matches"
+      "note": "in an older game these live inside src/main.ts; in a scaffolded one the file matches. The template's version knows no renderer: it is `followScreen(host, resize)`, and a game still on `followPixelRatio`/`onResize` has to change its main.ts in the same commit — and drop Pixi's `resizeTo: window`, or two things size the canvas"
     },
     {
       "template": "src/core/Store.ts",
@@ -222,7 +252,7 @@
         "src/game/Progress.ts"
       ],
       "mode": "manual",
-      "note": "the pattern is shared, the save shape is the game\u2019s"
+      "note": "the pattern is shared, the save shape is the game’s"
     },
     {
       "template": ".github/workflows/ci.yml",

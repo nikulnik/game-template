@@ -35,10 +35,30 @@
         display: block;
         touch-action: none;
       }
+      /* The HUD, for the three.js half of the template: three.js has no text worth the name, and a
+         browser lays out, wraps, translates and reads out a line of it for nothing. Unused by the
+         Pixi half, which draws its HUD in the scene — an empty layer that catches nothing costs
+         nothing, but it is yours to delete. `--hud` is set from `fitHud`, and everything inside is
+         sized in `em`, so the whole overlay scales with one number. */
+      #hud {
+        position: fixed;
+        inset: 0;
+        /* The game is underneath: taps go through. A button in here needs `pointer-events: auto`. */
+        pointer-events: none;
+        /* Clear of a notch, a rounded corner and a home indicator, on the phones that have them. */
+        padding: calc(0.7em + env(safe-area-inset-top)) calc(0.7em + env(safe-area-inset-right))
+          calc(0.7em + env(safe-area-inset-bottom)) calc(0.7em + env(safe-area-inset-left));
+        font: 500 calc(1.5rem * var(--hud, 1)) / 1.25 system-ui, -apple-system, 'Segoe UI', sans-serif;
+        color: #fff;
+        text-shadow: 0 1px 3px rgb(0 0 0 / 0.6);
+      }
     </style>
   </head>
   <body>
     <div id="app"></div>
+    <div id="hud"></div>
+    <!-- The renderer is picked in vite.config.ts, which points this at src/main3d.ts for a three.js
+         project. Leave the path alone; see TEMPLATE.md § Pick a renderer. -->
     <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

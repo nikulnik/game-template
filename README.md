@@ -1,11 +1,30 @@
 # game-template
 
-A Pixi.js v8 + TypeScript + Vite skeleton for a browser game that ships to five places from one
-codebase: the open web, CrazyGames, Yandex Games, a desktop app and a phone.
+A TypeScript + Vite skeleton for a browser game that ships to five places from one codebase: the
+open web, CrazyGames, Yandex Games, a desktop app and a phone. In 2D with **Pixi.js v8**, or in 3D
+with **three.js** — the choice is one setting, and everything that is not the renderer is shared.
 
-It is a working game, not a pile of snippets: `npm i && npm run dev` drops boxes on a floor. That
-demo (`src/game/Scene.ts`) is the one file meant to be deleted; everything around it is the part
-worth copying.
+It is a working game, not a pile of snippets: `npm i && npm run dev` drops boxes on a floor, and
+`npm run dev:3d` drops them in three dimensions. Those demos (`src/game/Scene.ts`,
+`src/game/Scene3d.ts`) are the files meant to be deleted; everything around them is the part worth
+copying.
+
+## Two dimensions or three
+
+Pick before you start — [TEMPLATE.md](TEMPLATE.md) § *Pick a renderer* has the deletions — and set
+`DEFAULT_RENDERER` in `vite.config.ts`. The files come in pairs; nothing else changes.
+
+|  | 2D | 3D |
+| --- | --- | --- |
+| Draws with | Pixi.js v8 | three.js |
+| Physics | Rapier 2D, y-**down** | Rapier 3D, y-**up** |
+| Units | metres × `PPM` (50 px), one `scale` onto the screen | metres, and the camera does the rest |
+| How a screen is fitted | a scale (`src/core/View.ts`) | a camera distance (`src/core/View3d.ts`) |
+| HUD | drawn in the scene | `#hud`, a DOM overlay |
+| Startup | `src/main.ts` | `src/main3d.ts` |
+
+Everything below is shared by both: the five builds, the platform adapters, saves, resizing,
+language, audio, obfuscation and the tests.
 
 ## What is in it
 
@@ -14,11 +33,12 @@ worth copying.
 | Five platform builds from one entry | `vite.config.ts` | One adapter per bundle, relative asset paths, `dist/<platform>` |
 | Platform adapters (ads, saves, language) | `src/platform/` | CrazyGames and Yandex SDKs behind one interface that never throws |
 | Saves | `src/core/Store.ts`, `src/game/Progress.ts` | Versioned, budgeted, ordered writes, no crash on a dead store |
-| Screen fit and resize | `src/core/View.ts`, `src/core/Screen.ts` | One scale for any screen, no letterboxing, pixel-ratio following |
+| Screen fit and resize | `src/core/View.ts` / `View3d.ts`, `src/core/Screen.ts` | One rule for any screen, no letterboxing, pixel-ratio following |
 | Language detection | `src/i18n.ts` | Platform → `?lang=` → saved → browser, with typed lines |
-| Physics | `src/physics/Physics.ts` | Rapier 2D, y-down, fixed timestep, PPM |
+| Physics | `src/physics/Physics.ts` / `Physics3d.ts` | Rapier 2D or 3D, fixed timestep, metric units |
 | Music and sound | `src/audio/Audio.ts` | Unlock on first gesture, mute when unwatched or mid-ad, music as a state |
 | Minifying and obfuscating | `build/obfuscate.ts` | Your code hidden, the engines left fast |
+| Either renderer, one build | `vite.config.ts` (`DEFAULT_RENDERER`) | 2D or 3D from the same platform adapters, saves, audio and builds |
 | Tests without a build step | `test/` | `node --test` straight over TypeScript |
 
 ## Start a project from it
@@ -46,6 +66,7 @@ Then work through [TEMPLATE.md](TEMPLATE.md) — every placeholder to rename and
 | Command | What it does |
 | --- | --- |
 | `npm run dev` | Dev server (web adapter) at http://localhost:5173 |
+| `npm run dev:3d` | The same, drawn with three.js — `RENDERER=three` in front of any script does this |
 | `npm run dev:crazygames` | Dev server with the CrazyGames SDK in local mode (fake ads) |
 | `npm run dev:yandex` | Dev server with the Yandex Games SDK |
 | `npm run build` | Web build to `dist/web` |
