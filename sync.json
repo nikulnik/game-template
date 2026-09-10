@@ -1,33 +1,256 @@
 {
   "comment": "What this template shares with the games it came from, and where each piece lives in them. `npm run sync -- <project-dir>` diffs the exact ones and lists the rest. See TEMPLATE.md.",
   "shared": [
-    { "template": "src/platform/types.ts", "candidates": ["src/platform/types.ts"], "mode": "exact" },
-    { "template": "src/platform/index.ts", "candidates": ["src/platform/index.ts"], "mode": "exact" },
-    { "template": "src/platform/web.ts", "candidates": ["src/platform/web.ts"], "mode": "exact" },
-    { "template": "src/platform/crazygames.ts", "candidates": ["src/platform/crazygames.ts"], "mode": "exact" },
-    { "template": "src/platform/yandex.ts", "candidates": ["src/platform/yandex.ts"], "mode": "exact" },
-    { "template": "src/platform/electron.ts", "candidates": ["src/platform/electron.ts"], "mode": "exact" },
-    { "template": "src/platform/mobile.ts", "candidates": ["src/platform/mobile.ts"], "mode": "exact" },
-    { "template": "src/platform/storage.ts", "candidates": ["src/platform/storage.ts"], "mode": "exact" },
-    { "template": "src/platform/loadScript.ts", "candidates": ["src/platform/loadScript.ts"], "mode": "exact" },
-    { "template": "src/physics/Physics.ts", "candidates": ["src/physics/Physics.ts"], "mode": "exact" },
-    { "template": "build/obfuscate.ts", "candidates": ["build/obfuscate.ts"], "mode": "exact" },
-    { "template": "electron/main.cjs", "candidates": ["electron/main.cjs"], "mode": "exact" },
-    { "template": "src/core/View.ts", "candidates": ["src/core/View.ts", "src/game/View.ts"], "mode": "exact" },
-    { "template": "test/view.test.ts", "candidates": ["test/view.test.ts"], "mode": "drift" },
-    { "template": "vite.config.ts", "candidates": ["vite.config.ts"], "mode": "drift" },
-    { "template": "tsconfig.json", "candidates": ["tsconfig.json"], "mode": "drift" },
-    { "template": "index.html", "candidates": ["index.html"], "mode": "drift" },
-    { "template": "electron-builder.yml", "candidates": ["electron-builder.yml"], "mode": "drift" },
-    { "template": "package.json", "candidates": ["package.json"], "mode": "drift" },
-    { "template": "src/core/Screen.ts", "candidates": ["src/main.ts"], "mode": "manual", "note": "resolution / followPixelRatio live inside the game's main.ts" },
-    { "template": "src/core/Store.ts", "candidates": ["src/game/Saves.ts", "src/core/Store.ts"], "mode": "manual", "note": "the template keeps the mechanism; the game keeps its own keys and save shape" },
-    { "template": "src/i18n.ts", "candidates": ["src/i18n.ts"], "mode": "manual", "note": "same machinery, different TRANSLATIONS: compare everything below `export type TranslationKey`" },
-    { "template": "src/audio/Audio.ts", "candidates": ["fe/src/audio_manager.js", "src/audio/Audio.ts"], "mode": "manual", "note": "ported from lidlness's JavaScript; compare behaviour, not text" },
-    { "template": "scripts/sfx-loudness.mjs", "candidates": ["scripts/sfx-loudness.mjs", "fe/scripts/sfx-loudness.mjs"], "mode": "drift" }
+    {
+      "template": "src/platform/types.ts",
+      "candidates": [
+        "src/platform/types.ts"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "src/platform/index.ts",
+      "candidates": [
+        "src/platform/index.ts"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "src/platform/web.ts",
+      "candidates": [
+        "src/platform/web.ts"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "src/platform/crazygames.ts",
+      "candidates": [
+        "src/platform/crazygames.ts"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "src/platform/yandex.ts",
+      "candidates": [
+        "src/platform/yandex.ts"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "src/platform/electron.ts",
+      "candidates": [
+        "src/platform/electron.ts"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "src/platform/mobile.ts",
+      "candidates": [
+        "src/platform/mobile.ts"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "src/platform/storage.ts",
+      "candidates": [
+        "src/platform/storage.ts"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "src/platform/loadScript.ts",
+      "candidates": [
+        "src/platform/loadScript.ts"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "src/physics/Physics.ts",
+      "candidates": [
+        "src/physics/Physics.ts"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "build/obfuscate.ts",
+      "candidates": [
+        "build/obfuscate.ts"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "electron/main.cjs",
+      "candidates": [
+        "electron/main.cjs"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "src/core/View.ts",
+      "candidates": [
+        "src/core/View.ts",
+        "src/game/View.ts"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "test/view.test.ts",
+      "candidates": [
+        "test/view.test.ts"
+      ],
+      "mode": "drift"
+    },
+    {
+      "template": "vite.config.ts",
+      "candidates": [
+        "vite.config.ts"
+      ],
+      "mode": "drift"
+    },
+    {
+      "template": "tsconfig.json",
+      "candidates": [
+        "tsconfig.json"
+      ],
+      "mode": "drift"
+    },
+    {
+      "template": "index.html",
+      "candidates": [
+        "index.html"
+      ],
+      "mode": "drift"
+    },
+    {
+      "template": "electron-builder.yml",
+      "candidates": [
+        "electron-builder.yml"
+      ],
+      "mode": "drift"
+    },
+    {
+      "template": "package.json",
+      "candidates": [
+        "package.json"
+      ],
+      "mode": "drift"
+    },
+    {
+      "template": "src/core/Screen.ts",
+      "candidates": [
+        "src/core/Screen.ts",
+        "src/main.ts"
+      ],
+      "mode": "manual",
+      "note": "in an older game these live inside src/main.ts; in a scaffolded one the file matches"
+    },
+    {
+      "template": "src/core/Store.ts",
+      "candidates": [
+        "src/game/Saves.ts",
+        "src/core/Store.ts"
+      ],
+      "mode": "manual",
+      "note": "the template keeps the mechanism; the game keeps its own keys and save shape"
+    },
+    {
+      "template": "src/i18n.ts",
+      "candidates": [
+        "src/i18n.ts"
+      ],
+      "mode": "manual",
+      "note": "same machinery, different TRANSLATIONS: compare everything below `export type TranslationKey`"
+    },
+    {
+      "template": "src/audio/Audio.ts",
+      "candidates": [
+        "fe/src/audio_manager.js",
+        "src/audio/Audio.ts"
+      ],
+      "mode": "manual",
+      "note": "ported from lidlness's JavaScript; compare behaviour, not text"
+    },
+    {
+      "template": "scripts/sfx-loudness.mjs",
+      "candidates": [
+        "scripts/sfx-loudness.mjs",
+        "fe/scripts/sfx-loudness.mjs"
+      ],
+      "mode": "drift"
+    },
+    {
+      "template": "src/core/Random.ts",
+      "candidates": [
+        "src/core/Random.ts",
+        "src/game/Random.ts"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "src/audio/manifest.ts",
+      "candidates": [
+        "src/audio/manifest.ts"
+      ],
+      "mode": "drift",
+      "note": "every game points at its own files"
+    },
+    {
+      "template": "test/store.test.ts",
+      "candidates": [
+        "test/store.test.ts"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "test/audio.test.ts",
+      "candidates": [
+        "test/audio.test.ts"
+      ],
+      "mode": "exact"
+    },
+    {
+      "template": "test/i18n.test.ts",
+      "candidates": [
+        "test/i18n.test.ts"
+      ],
+      "mode": "drift",
+      "note": "the machinery is shared, the lines tested are not"
+    },
+    {
+      "template": "src/game/Progress.ts",
+      "candidates": [
+        "src/game/Progress.ts"
+      ],
+      "mode": "manual",
+      "note": "the pattern is shared, the save shape is the game\u2019s"
+    },
+    {
+      "template": ".github/workflows/ci.yml",
+      "candidates": [
+        ".github/workflows/ci.yml"
+      ],
+      "mode": "drift"
+    },
+    {
+      "template": "assets/README.md",
+      "candidates": [
+        "assets/README.md"
+      ],
+      "mode": "drift"
+    }
   ],
   "sources": {
-    "game": { "path": "../game", "gave": "builds, platform adapters, view fit, saves, i18n, physics, obfuscation" },
-    "lidlness": { "path": "../lidlness", "gave": "audio (fe/src/audio_manager.js), sfx loudness script" }
+    "game": {
+      "path": "../game",
+      "gave": "builds, platform adapters, view fit, saves, i18n, physics, obfuscation"
+    },
+    "lidlness": {
+      "path": "../lidlness",
+      "gave": "audio (fe/src/audio_manager.js), sfx loudness script"
+    },
+    "creepstorm": {
+      "path": "../creepstorm",
+      "gave": "scaffolded 2026-09-10; nothing yet"
+    }
   }
 }

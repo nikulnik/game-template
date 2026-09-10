@@ -74,7 +74,10 @@ for (const dir of watched) {
   if (!existsSync(full) || !statSync(full).isDirectory()) continue;
   for (const name of readdirSync(full)) {
     const path = `${dir}/${name}`;
-    if (!known.has(path) && !statSync(join(target, path)).isDirectory()) newcomers.push(path);
+    // Not a newcomer if the template already has the very same file: the manifest may simply not
+    // list it yet, and shouting about our own files trains people to ignore the list.
+    if (known.has(path) || existsSync(join(ROOT, path)) || statSync(join(target, path)).isDirectory()) continue;
+    newcomers.push(path);
   }
 }
 
