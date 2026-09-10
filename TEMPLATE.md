@@ -5,9 +5,13 @@ something the template should have had.
 
 ## 1. Starting a project
 
+**Use this template** on [github.com/nikulnik/game-template](https://github.com/nikulnik/game-template)
+gives a fresh repo with no history. Locally:
+
 ```bash
-npx degit github:USER/game-template my-game     # or cp -r, then rm -rf .git && git init
-cd my-game && npm install && npm run dev
+cp -r ~/projects/game-template my-game
+cd my-game && rm -rf .git node_modules dist && git init
+npm install && npm run dev
 ```
 
 ### Rename

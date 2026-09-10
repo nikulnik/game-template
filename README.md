@@ -23,11 +23,17 @@ worth copying.
 
 ## Start a project from it
 
+Either press **Use this template** on
+[github.com/nikulnik/game-template](https://github.com/nikulnik/game-template) — a fresh repo with
+no history — or copy it locally:
+
 ```bash
-npx degit github:USER/game-template my-game    # or: cp -r, then rm -rf .git && git init
-cd my-game && npm install
-npm run dev
+cp -r ~/projects/game-template my-game
+cd my-game && rm -rf .git node_modules dist && git init
+npm install && npm run dev
 ```
+
+(The repo is private, so `npx degit` needs a token; the two routes above need none.)
 
 Then work through [TEMPLATE.md](TEMPLATE.md) — every placeholder to rename and every file to gut.
 
