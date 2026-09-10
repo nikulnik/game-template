@@ -82,9 +82,35 @@ a two-second telegraph in real time.
 
 ## Before you call something done
 
+This repo is kept uninstalled — no `node_modules`, no `dist` — so that nothing here can leak into a
+project by being copied. Run `npm install` first (`npm run sync` needs nothing, it is plain node).
+
 ```bash
+npm install
 npm run typecheck && npm test && npm run build:all
 ```
 
 `build:all` is not optional when the change touches `vite.config.ts`, `src/platform/` or anything
 imported by `main.ts`: four of the five builds are the ones nobody runs by accident.
+
+## The games this template answers to
+
+*(Reading this inside a game cloned from the template? This section is the template's own — replace
+it with the `## Feeding the template` block in TEMPLATE.md § 1 → Keep the link back.)*
+
+```
+~/projects/game         the fort/siege game this template was largely cut from
+~/projects/creepstorm   started from this template
+~/projects/lidlness     Go backend + Pixi frontend; the audio manager came out of fe/src/audio_manager.js
+```
+
+Each of them carries the same rule in its own `CLAUDE.md`: anything that is not about that game
+comes back here. From this side, check for drift before starting work and after a game ships
+something shared:
+
+```bash
+npm run sync -- ~/projects/creepstorm --diff
+```
+
+`!!` = files meant to be identical that have drifted, `+` = files the game has and this does not,
+`~` = same idea, different shape. A new game started from here gets added to this list.

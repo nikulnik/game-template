@@ -28,10 +28,14 @@ Either press **Use this template** on
 no history — or copy it locally:
 
 ```bash
-cp -r ~/projects/game-template my-game
-cd my-game && rm -rf .git node_modules dist && git init
+git clone ~/projects/game-template my-game
+cd my-game && rm -rf .git && git init
 npm install && npm run dev
 ```
+
+`git clone` carries only what is committed, so a new project never inherits this one's
+`node_modules` or `dist` — `npm install` fetches its own from `package-lock.json`. Never
+`cp -r` the template: that copies ~360 MB of someone else's install.
 
 (The repo is private, so `npx degit` needs a token; the two routes above need none.)
 
