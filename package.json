@@ -1,0 +1,52 @@
+{
+  "name": "game-template",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pixi.js + TypeScript + Vite game skeleton: five platform builds, saves, screen fit, i18n, physics, audio",
+  "author": "Stanislav Nikulnikov",
+  "type": "module",
+  "main": "electron/main.cjs",
+  "scripts": {
+    "dev": "vite",
+    "dev:crazygames": "vite --mode crazygames",
+    "dev:yandex": "vite --mode yandex",
+    "build": "npm run build:web",
+    "build:web": "vite build --mode web",
+    "build:crazygames": "vite build --mode crazygames",
+    "build:yandex": "vite build --mode yandex",
+    "build:electron": "vite build --mode electron",
+    "build:mobile": "vite build --mode mobile",
+    "build:all": "npm run build:web && npm run build:crazygames && npm run build:yandex && npm run build:electron && npm run build:mobile",
+    "zip:crazygames": "npm run build:crazygames && cd dist/crazygames && rm -f ../crazygames.zip && zip -qr ../crazygames.zip .",
+    "zip:yandex": "npm run build:yandex && cd dist/yandex && rm -f ../yandex.zip && zip -qr ../yandex.zip .",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test test/*.test.ts",
+    "audio:loudness": "node scripts/sfx-loudness.mjs",
+    "sync": "node scripts/sync-check.mjs",
+    "electron:start": "npm run build:electron && electron .",
+    "electron:package": "npm run build:electron && electron-builder",
+    "mobile:sync": "npm run build:mobile && cap sync",
+    "mobile:add:android": "cap add android",
+    "mobile:add:ios": "cap add ios",
+    "mobile:open:android": "cap open android",
+    "mobile:open:ios": "cap open ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^8.5.1",
+    "@dimforge/rapier2d-compat": "^0.19.3",
+    "howler": "^2.2.4",
+    "pixi.js": "^8.20.1"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.5.1",
+    "@types/howler": "^2.2.12",
+    "@types/node": "^26.4.1",
+    "electron": "^44.1.1",
+    "electron-builder": "^26.15.3",
+    "javascript-obfuscator": "^5.6.0",
+    "terser": "^5.51.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.2.2"
+  }
+}

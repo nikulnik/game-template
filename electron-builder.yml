@@ -1,0 +1,14 @@
+appId: com.example.game
+productName: Game
+directories:
+  output: release
+files:
+  - electron/**
+  - dist/electron/**
+  - package.json
+linux:
+  target: AppImage
+win:
+  target: nsis
+mac:
+  target: dmg

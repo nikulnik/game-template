@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <!-- No zooming, no bounce, and a viewport that reaches under a phone's notch. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
+    />
+    <!-- TEMPLATE: the title is what a browser tab and a bookmark show. -->
+    <title>Game</title>
+    <style>
+      html,
+      body {
+        margin: 0;
+        height: 100%;
+        overflow: hidden;
+        /* TEMPLATE: the same colour as the app background in main.ts and electron/main.cjs, so
+           nothing flashes white between the page loading and the first frame. */
+        background: #1a1a2e;
+        /* The game is the whole page: nothing here scrolls, bounces or pulls down to refresh. */
+        overscroll-behavior: none;
+        touch-action: none;
+        user-select: none;
+        -webkit-user-select: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* Fixed to the viewport rather than the document, so a phone's address bar sliding in or out
+         resizes the canvas instead of pushing it off the screen. */
+      #app {
+        position: fixed;
+        inset: 0;
+      }
+      canvas {
+        display: block;
+        touch-action: none;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="app"></div>
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>
