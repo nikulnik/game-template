@@ -52,6 +52,13 @@
         color: #fff;
         text-shadow: 0 1px 3px rgb(0 0 0 / 0.6);
       }
+      /* TEMPLATE: anything in the HUD that is laid out as a flex or grid box is also something the
+         game hides and shows, and a class with an id in front of it outranks the browser's own
+         `[hidden] { display: none }` — so without this, setting `hidden` on it does nothing at all
+         and the code looks right. Leave it here. */
+      #hud [hidden] {
+        display: none !important;
+      }
     </style>
   </head>
   <body>
