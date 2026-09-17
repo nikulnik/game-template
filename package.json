@@ -8,6 +8,7 @@
   "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
+    "dev:still": "HMR=0 vite",
     "dev:3d": "RENDERER=three vite",
     "dev:crazygames": "vite --mode crazygames",
     "dev:yandex": "vite --mode yandex",

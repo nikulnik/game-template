@@ -66,6 +66,7 @@ Then work through [TEMPLATE.md](TEMPLATE.md) — every placeholder to rename and
 | Command | What it does |
 | --- | --- |
 | `npm run dev` | Dev server (web adapter) at http://localhost:5173 |
+| `npm run dev:still` | The same, with `HMR=0`: the page never refreshes itself, so a game in progress survives edits; reload by hand to pick them up |
 | `npm run dev:3d` | The same, drawn with three.js — `RENDERER=three` in front of any script does this |
 | `npm run dev:crazygames` | Dev server with the CrazyGames SDK in local mode (fake ads) |
 | `npm run dev:yandex` | Dev server with the Yandex Games SDK |

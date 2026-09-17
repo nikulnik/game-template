@@ -139,6 +139,11 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 5173,
       host: true, // reachable from a phone on the same network
+      // HMR=0 to keep a game in progress alive while the source is edited under it: the page stops
+      // listening for updates — no hot swap, and no full reload either, which is what an edit to
+      // index.html or to anything the scene imports comes to — and picks them up at the next reload
+      // by hand. Still the dev build, `window.__GAME__` and all, which `preview` is not.
+      hmr: process.env.HMR !== '0',
     },
   };
 });
