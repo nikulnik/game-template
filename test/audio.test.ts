@@ -71,9 +71,18 @@ class FakeHowl {
     if (args.length === 1) return this.volumes.get(args[0] as number) ?? 0;
     this.volumes.set(args[1] as number, args[0] as number);
   }
-  rate(): void {}
-  stereo(): void {}
-  loop(): void {}
+  readonly rates: { rate: number; id?: number }[] = [];
+  readonly pans: { pan: number; id?: number }[] = [];
+  readonly loops: { loop: boolean; id?: number }[] = [];
+  rate(rate: number, id?: number): void {
+    this.rates.push({ rate, id });
+  }
+  stereo(pan: number, id?: number): void {
+    this.pans.push({ pan, id });
+  }
+  loop(loop: boolean, id?: number): void {
+    this.loops.push({ loop, id });
+  }
   duration(): number {
     return 1.5;
   }
@@ -206,6 +215,30 @@ test('a cue sounds at its own level times the player’s, and only so many at on
   audio.stopSfx('thud', first);
   assert.ok(audio.playSfx('thud') !== null, 'the cap did not free up when one stopped');
   assert.equal(audio.getSfxDurationMs('thud'), 1500);
+});
+
+test('a cue that asks for no pan, no loop and its own rate is not tuned after it starts', () => {
+  const audio = make();
+  audio.registerSfx('stone', { sources: ['stone.mp3'] });
+  FakeHowl.flush();
+  const howl = FakeHowl.made[0]!;
+
+  // A game that plays a cue a frame asks for none of these. Howler answers a pan by hanging a
+  // StereoPannerNode off the sound and stopping and starting it again to put the node in the chain, and it
+  // reads `Howler.ctx` to do it with no guard on a context that is not up yet — so a pan of nothing, asked
+  // for on every cue, is a sound restarted on every cue and a throw before the first gesture. Ask for
+  // nothing and nothing is done.
+  assert.ok(audio.playSfx('stone') !== null);
+  assert.deepEqual(howl.pans, []);
+  assert.deepEqual(howl.rates, []);
+  assert.deepEqual(howl.loops, []);
+
+  // And what a cue does ask for still reaches it.
+  const id = audio.playSfx('stone', { stereo: -0.5, rate: 1.2, loop: true });
+  assert.ok(id !== null);
+  assert.deepEqual(howl.pans, [{ pan: -0.5, id }]);
+  assert.deepEqual(howl.rates, [{ rate: 1.2, id }]);
+  assert.deepEqual(howl.loops, [{ loop: true, id }]);
 });
 
 test('a cue too far away does not play, and one that walks out of range falls silent', () => {

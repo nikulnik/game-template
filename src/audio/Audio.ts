@@ -601,9 +601,17 @@ export class Audio {
     effect.playing.add(id);
     effect.howl.once('end', () => effect.playing.delete(id), id);
     effect.howl.volume(effect.baseVolume * this.sfxVolume * clampVolume(volume) * attenuation, id);
-    effect.howl.rate?.(rate, id);
-    effect.howl.stereo?.(stereo, id);
-    effect.howl.loop?.(loop === true, id);
+    // Only what this cue actually asks for. A pooled sound comes back reset to its group's rate, pan and
+    // loop, so setting any of them to its default is not a no-op that costs nothing — it is Howler doing
+    // work on a sound that has already started. `stereo` is the one that bites: it hangs a StereoPannerNode
+    // off the sound and then stops and starts it again to put the node in the chain (`setupPanner` in
+    // howler.js), for every cue the game plays, and it is the one call in here with no guard on a context
+    // that is not up yet — with `Howler.ctx` still null it throws out of `playSfx` and into whatever asked
+    // for the sound. A game that places a cue on the map places it by volume (`sfxDistanceAttenuation`),
+    // and never asks for a pan at all.
+    if (rate !== 1) effect.howl.rate?.(rate, id);
+    if (stereo !== 0) effect.howl.stereo?.(stereo, id);
+    if (loop === true) effect.howl.loop?.(true, id);
     return id;
   }
 
